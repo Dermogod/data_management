@@ -12,7 +12,7 @@ import logging
 import os
 import socketserver
 from http import HTTPStatus
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 import psycopg2
 from msgpack import packb, unpackb
@@ -82,7 +82,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         
         request_info = urlparse(self.path)
         user_id = request_info[2].split('/')[-1]
-        query_limit = request_info[4]
+        query_components = parse_qs(request_info[4]) # {'limit': [value] }
+        query_limit = query_components.get('limit', [None])[-1] #get 'limit' value or None
 
         logging.info(f'Запрос истории оценок пользователю с ID {user_id}')
         # check if data is already in Redis cash
